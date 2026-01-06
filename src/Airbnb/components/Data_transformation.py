@@ -38,8 +38,8 @@ class DataTransformation:
             property_type_cat = ['Apartment', 'House', 'Condominium', 'Townhouse', 'Loft', 'Other', 'Guesthouse', 'Bed & Breakfast', 'Bungalow', 'Villa', 'Dorm', 'Guest suite', 'Camper/RV', 'Timeshare', 'Cabin', 'In-law', 'Hostel', 'Boutique hotel', 'Boat', 'Serviced apartment', 'Tent', 'Castle', 'Vacation home', 'Yurt', 'Hut', 'Treehouse', 'Chalet', 'Earth House', 'Tipi', 'Train', 'Cave', 'Casa particular', 'Parking Space', 'Lighthouse', 'Island']
             room_type_cat = ['Entire home/apt', 'Private room', 'Shared room']
             bed_type_cat = ['Real Bed', 'Futon', 'Pull-out Sofa', 'Airbed', 'Couch']
-            cancellation_policy_cat = ['strict', 'moderate', 'flexible', 'super_strict_30', 'super_strict_60'],
-            cleaning_fee_cat = ['True', 'False']
+            cancellation_policy_cat = ['strict', 'moderate', 'flexible', 'super_strict_30', 'super_strict_60']
+            cleaning_fee_cat = [False, True]
             city_cat = ['NYC', 'SF', 'DC', 'LA', 'Chicago', 'Boston']
             host_has_profile_pic_cat = ['t', 'f']
             host_identity_verified_cat = ['t', 'f']

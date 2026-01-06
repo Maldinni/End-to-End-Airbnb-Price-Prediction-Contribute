@@ -1,3 +1,8 @@
+# Artifacts
+Artifacts/
+Model.pkl
+Preprocessor.pkl
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

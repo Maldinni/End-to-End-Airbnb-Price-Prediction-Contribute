@@ -8,27 +8,65 @@ app = Flask(__name__)
 def home():
     if request.method == "POST":
         try:
-            # Validate and convert form data to CustomData object
+            # Helper converters
+            def to_int(name, default=0):
+                try:
+                    return int(request.form.get(name) or default)
+                except Exception:
+                    return default
+
+            def to_float(name, default=0.0):
+                try:
+                    return float(request.form.get(name) or default)
+                except Exception:
+                    return default
+
+            def to_bool_flag(name):
+                return True if request.form.get(name) == '1' else False
+
+            city_map = {
+                'New York': 'NYC',
+                'San Francisco': 'SF',
+                'Washington, D.C.': 'DC',
+                'Los Angeles': 'LA',
+                'Chicago': 'Chicago',
+                'Boston': 'Boston'
+            }
+
+            room_map = {
+                'Entire Home/Apt': 'Entire home/apt',
+                'Private Room': 'Private room',
+                'Shared Room': 'Shared room'
+            }
+
+            cancel_map = {
+                'Flexible': 'flexible',
+                'Moderate': 'moderate',
+                'Strict': 'strict',
+                'Super strict': 'super_strict_30',
+                'Advanced Super Strict': 'super_strict_60'
+            }
+
             data = CustomData(
-                property_type=request.form.get("propertytype"),
-                room_type=request.form.get("roomtype"),
-                amenities=(request.form.get("amenties")),
-                accommodates=(request.form.get("accommodates")),
-                bathrooms=(request.form.get("bathrooms")),
-                bed_type=request.form.get("bedtype"),
-                cancellation_policy=request.form.get("canceltype"),
-                cleaning_fee=(request.form.get("clean")),
-                city=request.form.get("city"),
-                host_has_profile_pic=request.form.get("dp"),
-                host_identity_verified=request.form.get("verify"),
-                host_response_rate=request.form.get("hostresponse"),
-                instant_bookable=request.form.get("instbook"),
-                latitude=(request.form.get("lat")),
-                longitude=(request.form.get("long")),
-                number_of_reviews=(request.form.get("review")),
-                review_scores_rating=(request.form.get("overallreview")),
-                bedrooms=(request.form.get("bedrooms")),
-                beds=(request.form.get("beds"))
+                property_type=request.form.get("property_type") or 'Other',
+                room_type=room_map.get(request.form.get("room_type"), request.form.get("room_type")),
+                amenities=to_int("amenities", 2),
+                accommodates=to_int("accommodates", 1),
+                bathrooms=to_float("bathrooms", 0.0),
+                bed_type=request.form.get("bed_type") or 'Real Bed',
+                cancellation_policy=cancel_map.get(request.form.get("cancellation_policy"), request.form.get("cancellation_policy")),
+                cleaning_fee=to_bool_flag("cleaning_fee"),
+                city=city_map.get(request.form.get("city"), request.form.get("city")),
+                host_has_profile_pic=('t' if to_bool_flag("host_has_profile_pic") else 'f'),
+                host_identity_verified=('t' if to_bool_flag("host_identity_verified") else 'f'),
+                host_response_rate=to_int("host_response_rate", 0),
+                instant_bookable=('t' if to_bool_flag("instant_bookable") else 'f'),
+                latitude=to_float("latitude", 0.0),
+                longitude=to_float("longitude", 0.0),
+                number_of_reviews=to_int("number_of_reviews", 0),
+                review_scores_rating=to_int("review_scores_rating", 0),
+                bedrooms=to_int("bedrooms", 0),
+                beds=to_int("beds", 0)
             )
 
             final_data = data.get_data_as_dataframe()
@@ -36,8 +74,14 @@ def home():
             # Make prediction
             predict_pipeline = PredictPipeline()
             pred = predict_pipeline.predict(final_data)
-            result = round(pred[0], 2)
-            return render_template("index.html", final_result=result)
+            # Model predicts log_price — convert back to price
+            try:
+                price = float(np.exp(pred[0]))
+                result = round(price, 2)
+            except Exception:
+                result = round(float(pred[0]), 2)
+
+            return render_template("index.html", result=result)
 
         except Exception as e:
             # Handle exceptions gracefully
