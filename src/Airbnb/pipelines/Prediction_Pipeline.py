@@ -34,7 +34,7 @@ class CustomData:
                  bathrooms: int,
                  bed_type: str,
                  cancellation_policy: str,
-                 cleaning_fee: float,
+                 cleaning_fee: bool,
                  city: str,
                  host_has_profile_pic: str,
                  host_identity_verified: str,
@@ -91,7 +91,39 @@ class CustomData:
                 'beds': [self.beds]
             }
             df = pd.DataFrame(custom_data_input_dict)
-            df = np.reshape(df, (19,))
+            # Ensure host_response_rate is numeric (strip trailing '%' if present)
+            try:
+                if df['host_response_rate'].dtype == object:
+                    df['host_response_rate'] = df['host_response_rate'].astype(str).str.replace('%', '', regex=False)
+                df['host_response_rate'] = pd.to_numeric(df['host_response_rate'], errors='coerce').fillna(0).astype(int)
+            except Exception:
+                pass
+
+            # Fill missing categorical defaults to avoid unknown categories during transform
+            defaults = {
+                'property_type': 'Other',
+                'room_type': 'Entire home/apt',
+                'bed_type': 'Real Bed',
+                'cancellation_policy': 'flexible',
+                'cleaning_fee': False,
+                'city': 'NYC',
+                'host_has_profile_pic': 't',
+                'host_identity_verified': 't',
+                'instant_bookable': 't'
+            }
+            try:
+                df.fillna(value=defaults, inplace=True)
+            except Exception:
+                pass
+
+            # Normalize cleaning_fee to boolean if provided as string
+            try:
+                mapping = {'True': True, 'False': False, 'true': True, 'false': False, 'T': True, 'F': False}
+                df['cleaning_fee'] = df['cleaning_fee'].replace(mapping)
+                df['cleaning_fee'] = df['cleaning_fee'].astype(bool)
+            except Exception:
+                pass
+
             logging.info('Dataframe Gathered')
             return df
         except Exception as e:
