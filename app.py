@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template
 from src.Airbnb.pipelines.Prediction_Pipeline import CustomData, PredictPipeline
+import numpy as np
 
 app = Flask(__name__)
 
@@ -74,7 +75,7 @@ def home():
             # Make prediction
             predict_pipeline = PredictPipeline()
             pred = predict_pipeline.predict(final_data)
-            # Model predicts log_price — convert back to price
+            # Model predicts log_price — convert back to price in US$
             try:
                 price = float(np.exp(pred[0]))
                 result = round(price, 2)
